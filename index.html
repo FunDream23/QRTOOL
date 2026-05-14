@@ -10564,40 +10564,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
-  .view-header {
-    background: linear-gradient(135deg, var(--primary), #7c3aed);
-    padding: 32px 24px 24px;
-    text-align: center;
-    position: relative;
-  }
-  .view-header .icon-badge {
-    width: 56px;
-    height: 56px;
-    background: rgba(255,255,255,.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin: 0 auto 12px;
-    backdrop-filter: blur(4px);
-  }
-  .view-header h2 {
-    color: #fff;
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    word-break: break-word;
-  }
-  .view-header .sku-tag {
-    display: inline-block;
-    background: rgba(255,255,255,.15);
-    color: rgba(255,255,255,.9);
-    padding: 2px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-  }
-  .view-body { padding: 24px; }
+  .view-body { padding: 0; }
   .view-field {
     display: flex;
     justify-content: space-between;
@@ -10611,20 +10578,19 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   .view-field .desc { font-size: 14px; color: var(--gray-600); text-align: right; line-height: 1.5; }
   .view-product-image {
     width: 100%;
-    max-height: 280px;
-    object-fit: cover;
     display: block;
     background: var(--gray-100);
   }
   .view-product-image-placeholder {
     width: 100%;
-    height: 160px;
+    min-height: 200px;
     background: var(--gray-100);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--gray-400);
     font-size: 14px;
+    padding: 40px;
   }
   .view-footer {
     padding: 16px 24px 24px;
@@ -10699,22 +10665,14 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 </head>
 <body>
 
-<!-- ==================== 扫码展示页 (只显示产品卡片) ==================== -->
+<!-- ==================== 扫码展示页 (产品图片优先) ==================== -->
 <div class="container">
   <div class="view-page" id="view-page">
-    <div style="text-align:center;padding:20px 0;">
-      <span style="font-size:20px;font-weight:700;color:var(--gray-800);">📦 产品信息</span>
-    </div>
     <div class="view-product-card" id="view-product-card">
       <img class="view-product-image" id="view-prod-image" style="display:none;" alt="产品图片" />
       <div class="view-product-image-placeholder" id="view-prod-image-placeholder">📷 暂无产品图片</div>
-      <div class="view-header">
-        <div class="icon-badge">📦</div>
-        <h2 id="view-prod-name">产品名称</h2>
-        <span class="sku-tag" id="view-prod-sku">SKU</span>
-      </div>
       <div class="view-body" id="view-body-fields">
-        <!-- 动态生成 -->
+        <!-- 动态生成: 产品名 + 价格 -->
       </div>
       <div class="view-footer">
         <div class="timestamp" id="view-timestamp"></div>
@@ -11008,10 +10966,6 @@ function showViewPage(data) {
   document.getElementById('tool-container').style.display = 'none';
   document.getElementById('view-page').classList.add('show');
 
-  // 填充数据
-  document.getElementById('view-prod-name').textContent = data.name || '未命名产品';
-  document.getElementById('view-prod-sku').textContent = data.sku ? '编号: ' + data.sku : '';
-
   // 产品图片
   const imgEl = document.getElementById('view-prod-image');
   const placeholderEl = document.getElementById('view-prod-image-placeholder');
@@ -11032,30 +10986,27 @@ function showViewPage(data) {
   const body = document.getElementById('view-body-fields');
   body.innerHTML = '';
 
-  const fields = [
-    { label: '分类', key: 'category' },
-    { label: '品牌', key: 'brand' },
-    { label: '价格', key: 'price', cls: 'price', fmt: v => v ? '¥' + Number(v).toFixed(2) : '' },
-    { label: '库存', key: 'stock', fmt: v => v !== undefined && v !== '' ? v + ' 件' : '' },
-    { label: '产品描述', key: 'description', cls: 'desc' },
-    { label: '备注', key: 'remark', cls: 'desc' },
-  ];
-
-  let hasAny = false;
-  fields.forEach(f => {
-    let val = data[f.key];
-    if (val === undefined || val === null || val === '') return;
-    if (f.fmt) val = f.fmt(val);
-    if (!val) return;
-    hasAny = true;
-    body.innerHTML += `<div class="view-field">
-      <span class="label">${f.label}</span>
-      <span class="value ${f.cls || ''}">${escapeHtml(String(val))}</span>
+  // 产品名称
+  if (data.name) {
+    body.innerHTML += `<div style="padding:16px 20px 4px;">
+      <div style="font-size:18px;font-weight:700;color:var(--gray-900);">${escapeHtml(data.name)}</div>
+      ${data.sku ? `<div style="font-size:12px;color:var(--gray-400);margin-top:2px;">编号: ${escapeHtml(data.sku)}</div>` : ''}
     </div>`;
-  });
+  }
 
-  if (!hasAny) {
-    body.innerHTML = '<div class="view-field"><span class="label" style="color:var(--gray-400);text-align:center;width:100%;">暂无详细信息</span></div>';
+  // 价格
+  if (data.price) {
+    body.innerHTML += `<div style="padding:4px 20px 12px;">
+      <span style="font-size:24px;font-weight:700;color:var(--danger);">¥${Number(data.price).toFixed(2)}</span>
+      ${data.brand ? `<span style="font-size:13px;color:var(--gray-400);margin-left:10px;">${escapeHtml(data.brand)}</span>` : ''}
+    </div>`;
+  }
+
+  // 描述（紧凑显示）
+  if (data.description) {
+    body.innerHTML += `<div style="padding:4px 20px 12px;border-top:1px solid var(--gray-100);">
+      <div style="font-size:13px;color:var(--gray-500);line-height:1.6;">${escapeHtml(data.description)}</div>
+    </div>`;
   }
 
   // 时间
