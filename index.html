@@ -10549,33 +10549,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   /* ====== Product View Page (扫码展示页) ====== */
   .view-page {
     display: none;
-    max-width: 500px;
-    margin: 0 auto;
+    background: #fff;
   }
   .view-page.show { display: block; }
-  .view-product-card {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    animation: cardSlideUp .4s ease;
-  }
-  @keyframes cardSlideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .view-body { padding: 0; }
-  .view-field {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--gray-100);
-  }
-  .view-field:last-child { border-bottom: none; }
-  .view-field .label { font-size: 13px; color: var(--gray-400); min-width: 80px; }
-  .view-field .value { font-size: 14px; color: var(--gray-800); font-weight: 500; text-align: right; flex: 1; }
-  .view-field .price { color: var(--danger); font-size: 18px; font-weight: 700; }
-  .view-field .desc { font-size: 14px; color: var(--gray-600); text-align: right; line-height: 1.5; }
   .view-product-image {
     width: 100%;
     display: block;
@@ -10583,7 +10559,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   }
   .view-product-image-placeholder {
     width: 100%;
-    min-height: 200px;
+    min-height: 100vh;
     background: var(--gray-100);
     display: flex;
     align-items: center;
@@ -10665,20 +10641,11 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 </head>
 <body>
 
-<!-- ==================== 扫码展示页 (产品图片优先) ==================== -->
-<div class="container">
-  <div class="view-page" id="view-page">
-    <div class="view-product-card" id="view-product-card">
-      <img class="view-product-image" id="view-prod-image" style="display:none;" alt="产品图片" />
-      <div class="view-product-image-placeholder" id="view-prod-image-placeholder">📷 暂无产品图片</div>
-      <div class="view-body" id="view-body-fields">
-        <!-- 动态生成: 产品名 + 价格 -->
-      </div>
-      <div class="view-footer">
-        <div class="timestamp" id="view-timestamp"></div>
-        <button class="go-tool-btn" onclick="showTool()">🔧 前往管理工具</button>
-      </div>
-    </div>
+<!-- ==================== 扫码展示页 (纯图片模式) ==================== -->
+<div class="view-page" id="view-page">
+  <div style="width:100%;min-height:100vh;background:#fff;display:flex;flex-direction:column;">
+    <img class="view-product-image" id="view-prod-image" style="display:none;width:100%;" alt="产品图片" />
+    <div class="view-product-image-placeholder" id="view-prod-image-placeholder">📷 暂无产品图片</div>
   </div>
 </div>
 
@@ -10960,13 +10927,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================================================
-//  产品展示页（别人扫码看到的样子）
+//  产品展示页（纯图片模式）
 // ========================================================================
 function showViewPage(data) {
   document.getElementById('tool-container').style.display = 'none';
   document.getElementById('view-page').classList.add('show');
 
-  // 产品图片
+  // 只显示产品图片
   const imgEl = document.getElementById('view-prod-image');
   const placeholderEl = document.getElementById('view-prod-image-placeholder');
   if (data.image) {
@@ -10982,32 +10949,7 @@ function showViewPage(data) {
     imgEl.style.display = 'none';
     placeholderEl.style.display = 'flex';
   }
-
-  const body = document.getElementById('view-body-fields');
-  body.innerHTML = '';
-
-  // 产品名称
-  if (data.name) {
-    body.innerHTML += `<div style="padding:16px 20px 4px;">
-      <div style="font-size:18px;font-weight:700;color:var(--gray-900);">${escapeHtml(data.name)}</div>
-      ${data.sku ? `<div style="font-size:12px;color:var(--gray-400);margin-top:2px;">编号: ${escapeHtml(data.sku)}</div>` : ''}
-    </div>`;
-  }
-
-  // 价格
-  if (data.price) {
-    body.innerHTML += `<div style="padding:4px 20px 12px;">
-      <span style="font-size:24px;font-weight:700;color:var(--danger);">¥${Number(data.price).toFixed(2)}</span>
-      ${data.brand ? `<span style="font-size:13px;color:var(--gray-400);margin-left:10px;">${escapeHtml(data.brand)}</span>` : ''}
-    </div>`;
-  }
-
-  // 描述（紧凑显示）
-  if (data.description) {
-    body.innerHTML += `<div style="padding:4px 20px 12px;border-top:1px solid var(--gray-100);">
-      <div style="font-size:13px;color:var(--gray-500);line-height:1.6;">${escapeHtml(data.description)}</div>
-    </div>`;
-  }
+}
 
   // 时间
   if (data._ts) {
