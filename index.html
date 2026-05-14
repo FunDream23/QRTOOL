@@ -10568,32 +10568,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     font-size: 14px;
     padding: 40px;
   }
-  .view-footer {
-    padding: 16px 24px 24px;
-    text-align: center;
-  }
-  .view-footer .timestamp {
-    font-size: 12px;
-    color: var(--gray-400);
-    margin-bottom: 12px;
-  }
-  .view-footer .go-tool-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 20px;
-    background: var(--primary-light);
-    color: var(--primary);
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  .view-footer .go-tool-btn:hover { background: #dde4ff; }
 
-  /* ====== Hosting Guide ====== */
-  .guide-box {
+  /* ====== Hosting Guide ====== */.guide-box {
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
     border-radius: var(--radius-sm);
@@ -10624,9 +10600,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     .scanner-wrapper { max-width: 100%; }
     .modal { padding: 20px; }
     .btn-group .btn { flex: 1; justify-content: center; }
-    .view-header { padding: 24px 16px 20px; }
-    .view-body { padding: 16px; }
-    .view-header h2 { font-size: 19px; }
   }
 
   .mt-2 { margin-top: 8px; }
@@ -10948,15 +10921,6 @@ function showViewPage(data) {
   } else {
     imgEl.style.display = 'none';
     placeholderEl.style.display = 'flex';
-  }
-}
-
-  // 时间
-  if (data._ts) {
-    const d = new Date(data._ts);
-    document.getElementById('view-timestamp').textContent = '更新时间: ' + d.toLocaleString('zh-CN');
-  } else {
-    document.getElementById('view-timestamp').textContent = '';
   }
 }
 
