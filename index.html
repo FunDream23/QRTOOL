@@ -508,6 +508,23 @@
   .view-field .value { font-size: 14px; color: var(--gray-800); font-weight: 500; text-align: right; flex: 1; }
   .view-field .price { color: var(--danger); font-size: 18px; font-weight: 700; }
   .view-field .desc { font-size: 14px; color: var(--gray-600); text-align: right; line-height: 1.5; }
+  .view-product-image {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+    background: var(--gray-100);
+  }
+  .view-product-image-placeholder {
+    width: 100%;
+    height: 160px;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-400);
+    font-size: 14px;
+  }
   .view-footer {
     padding: 16px 24px 24px;
     text-align: center;
@@ -588,6 +605,8 @@
       <span style="font-size:20px;font-weight:700;color:var(--gray-800);">📦 产品信息</span>
     </div>
     <div class="view-product-card" id="view-product-card">
+      <img class="view-product-image" id="view-prod-image" style="display:none;" alt="产品图片" />
+      <div class="view-product-image-placeholder" id="view-prod-image-placeholder">📷 暂无产品图片</div>
       <div class="view-header">
         <div class="icon-badge">📦</div>
         <h2 id="view-prod-name">产品名称</h2>
@@ -695,6 +714,11 @@
         <div class="form-group">
           <label>价格 (元)</label>
           <input type="number" id="prod-price" placeholder="0.00" step="0.01" min="0" />
+        </div>
+        <div class="form-group full">
+          <label>产品图片</label>
+          <input type="url" id="prod-image" placeholder="图片链接（上传到仓库或图床后的 URL）" />
+          <div style="font-size:12px;color:var(--gray-400);margin-top:2px;">💡 图片可上传到本仓库 images/ 目录，然后填相对路径如 images/product.jpg</div>
         </div>
         <div class="form-group full">
           <label>描述 / 规格</label>
@@ -887,6 +911,23 @@ function showViewPage(data) {
   document.getElementById('view-prod-name').textContent = data.name || '未命名产品';
   document.getElementById('view-prod-sku').textContent = data.sku ? '编号: ' + data.sku : '';
 
+  // 产品图片
+  const imgEl = document.getElementById('view-prod-image');
+  const placeholderEl = document.getElementById('view-prod-image-placeholder');
+  if (data.image) {
+    imgEl.src = data.image;
+    imgEl.style.display = 'block';
+    placeholderEl.style.display = 'none';
+    imgEl.onerror = function() {
+      imgEl.style.display = 'none';
+      placeholderEl.style.display = 'flex';
+      placeholderEl.textContent = '⚠️ 图片加载失败';
+    };
+  } else {
+    imgEl.style.display = 'none';
+    placeholderEl.style.display = 'flex';
+  }
+
   const body = document.getElementById('view-body-fields');
   body.innerHTML = '';
 
@@ -972,6 +1013,7 @@ function collectProductData() {
   const price = document.getElementById('prod-price').value;
   data.price = price ? parseFloat(price) : 0;
   data.description = document.getElementById('prod-desc').value.trim();
+  data.image = document.getElementById('prod-image').value.trim();
   data.brand = document.getElementById('prod-brand').value.trim();
   const stock = document.getElementById('prod-stock').value;
   data.stock = stock ? parseInt(stock) : 0;
@@ -1397,6 +1439,7 @@ function showProductDetail(product) {
   const content = document.getElementById('modal-content');
   const fields = [
     { label: '产品名称', key: 'name', full: true },
+    { label: '产品图片', key: 'image', full: true, raw: true, fmt: v => v ? `<img src="${escapeHtml(v)}" style="max-width:100%;max-height:180px;border-radius:6px;margin-top:4px;" onerror="this.style.display='none'" />` : '-' },
     { label: '编号 / SKU', key: 'sku' },
     { label: '分类', key: 'category' },
     { label: '价格', key: 'price', fmt: v => v ? '¥' + v : '-' },
@@ -1412,7 +1455,7 @@ function showProductDetail(product) {
     else if (f.fmt) val = f.fmt(val);
     html += `<div class="detail-item ${f.full ? 'full' : ''}">
       <div class="label">${f.label}</div>
-      <div class="value">${escapeHtml(String(val))}</div>
+      <div class="value">${f.raw ? val : escapeHtml(String(val))}</div>
     </div>`;
   });
   content.innerHTML = html;
@@ -1440,6 +1483,7 @@ function generateFromProduct(idx) {
   document.getElementById('prod-category').value = prod.category || '';
   document.getElementById('prod-price').value = prod.price || '';
   document.getElementById('prod-desc').value = prod.description || '';
+  document.getElementById('prod-image').value = prod.image || '';
   document.getElementById('prod-brand').value = prod.brand || '';
   document.getElementById('prod-stock').value = prod.stock || '';
   document.getElementById('prod-remark').value = prod.remark || '';
