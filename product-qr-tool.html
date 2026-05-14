@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📦 产品信息二维码 - 扫码即看</title>
+<!-- QR Code 生成库 -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- jsQR 扫码库 -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<style>
+  /* ====== Reset & Base ====== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #eef2ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+    --transition: .2s ease;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.6;
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  /* ====== Layout ====== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    padding: 28px 0 20px;
+  }
+  header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  header h1 span { background: var(--primary); color: #fff; font-size: 14px; padding: 2px 10px; border-radius: 20px; }
+  header p { color: var(--gray-500); font-size: 14px; margin-top: 4px; }
+
+  /* ====== Tabs ====== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--gray-200);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: fit-content;
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--gray-800); }
+  .tab-btn.active {
+    background: #fff;
+    color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+
+  /* ====== Panels ====== */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ====== Cards ====== */
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  /* ====== Form ====== */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+  .form-group label .req { color: var(--danger); }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 9px 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition);
+    font-family: inherit;
+    background: #fff;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* ====== Buttons ====== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #059669; }
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-warning:hover { background: #d97706; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-outline {
+    background: transparent;
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+  }
+  .btn-outline:hover { background: var(--gray-100); }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+  .btn-lg { padding: 12px 28px; font-size: 16px; }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* ====== QR Code Display ====== */
+  .qr-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+  }
+  #qrcode {
+    padding: 16px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+  }
+  #qrcode img { display: block; }
+  .qr-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .qr-data-preview {
+    width: 100%;
+    max-width: 480px;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 12px;
+    color: var(--gray-500);
+    word-break: break-all;
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid var(--gray-200);
+    font-family: "SF Mono", "Cascadia Code", monospace;
+  }
+
+  /* ====== Mode Switch ====== */
+  .mode-switch {
+    display: flex;
+    gap: 0;
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: 8px;
+    border: 1px solid var(--gray-200);
+  }
+  .mode-switch .mode-btn {
+    flex: 1;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+  }
+  .mode-switch .mode-btn:hover { color: var(--gray-700); }
+  .mode-switch .mode-btn.active {
+    background: #fff;
+    color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+  .mode-hint {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 4px;
+    padding: 6px 10px;
+    background: var(--gray-50);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+  }
+  .mode-hint.share { border-left-color: var(--success); }
+
+  /* ====== Scanner ====== */
+  .scanner-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 4/3;
+  }
+  .scanner-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .scanner-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .scanner-overlay .scan-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 50%;
+    border: 2px solid rgba(79,70,229,.6);
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.45);
+  }
+  .scanner-overlay .scan-line {
+    position: absolute;
+    top: 25%;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: var(--primary);
+    animation: scanLine 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--primary);
+  }
+  @keyframes scanLine {
+    0%, 100% { top: 25%; }
+    50% { top: 70%; }
+  }
+  .scanner-status {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: var(--gray-500);
+  }
+  .scanner-result-card {
+    background: var(--success);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 12px;
+    display: none;
+  }
+  .scanner-result-card.show { display: block; }
+  .scanner-result-card .label { font-size: 12px; opacity: .85; }
+  .scanner-result-card .value { font-size: 15px; font-weight: 600; margin-top: 2px; }
+  .scanner-result-card .actions { margin-top: 10px; display: flex; gap: 8px; }
+  .scanner-result-card .actions .btn { background: rgba(255,255,255,.2); color: #fff; }
+  .scanner-result-card .actions .btn:hover { background: rgba(255,255,255,.3); }
+
+  /* ====== Product Table ====== */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    background: var(--gray-50);
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    border-bottom: 2px solid var(--gray-200);
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  tbody tr:hover { background: var(--gray-50); }
+  .product-name { font-weight: 600; color: var(--gray-800); }
+  .product-sku { font-size: 12px; color: var(--gray-400); }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-blue { background: var(--primary-light); color: var(--primary); }
+  .tag-green { background: #ecfdf5; color: var(--success); }
+  .tag-orange { background: #fffbeb; color: var(--warning); }
+  .row-actions { white-space: nowrap; }
+  .row-actions .btn { padding: 4px 10px; font-size: 12px; }
+
+  /* ====== Notifications ====== */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: transform .4s ease, opacity .4s ease;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast-success { background: var(--success); }
+  .toast-error { background: var(--danger); }
+  .toast-info { background: var(--primary); }
+
+  /* ====== Modal ====== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    max-width: 520px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: modalIn .25s ease;
+  }
+  @keyframes modalIn {
+    from { transform: scale(.95) translateY(10px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--gray-100);
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500);
+    transition: var(--transition);
+  }
+  .modal-close:hover { background: var(--gray-200); }
+  .modal h2 { font-size: 18px; margin-bottom: 16px; }
+  .modal .product-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .modal .detail-item { padding: 6px 0; }
+  .modal .detail-item .label { font-size: 12px; color: var(--gray-400); }
+  .modal .detail-item .value { font-size: 14px; color: var(--gray-800); font-weight: 500; }
+  .modal .detail-item.full { grid-column: 1 / -1; }
+
+  /* ====== Empty State ====== */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ====== Product View Page (扫码展示页) ====== */
+  .view-page {
+    display: none;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .view-page.show { display: block; }
+  .view-product-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: cardSlideUp .4s ease;
+  }
+  @keyframes cardSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .view-header {
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    padding: 32px 24px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .view-header .icon-badge {
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+    backdrop-filter: blur(4px);
+  }
+  .view-header h2 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  .view-header .sku-tag {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    color: rgba(255,255,255,.9);
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+  .view-body { padding: 24px; }
+  .view-field {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .view-field:last-child { border-bottom: none; }
+  .view-field .label { font-size: 13px; color: var(--gray-400); min-width: 80px; }
+  .view-field .value { font-size: 14px; color: var(--gray-800); font-weight: 500; text-align: right; flex: 1; }
+  .view-field .price { color: var(--danger); font-size: 18px; font-weight: 700; }
+  .view-field .desc { font-size: 14px; color: var(--gray-600); text-align: right; line-height: 1.5; }
+  .view-footer {
+    padding: 16px 24px 24px;
+    text-align: center;
+  }
+  .view-footer .timestamp {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-bottom: 12px;
+  }
+  .view-footer .go-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .view-footer .go-tool-btn:hover { background: #dde4ff; }
+
+  /* ====== Hosting Guide ====== */
+  .guide-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .guide-box h4 { color: var(--success); font-size: 14px; margin-bottom: 6px; }
+  .guide-box code {
+    background: #dcfce7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    word-break: break-all;
+  }
+  .guide-box .step { margin: 4px 0; padding-left: 20px; position: relative; }
+  .guide-box .step::before { content: attr(data-num); position: absolute; left: 0; font-weight: 700; color: var(--success); }
+
+  /* ====== Responsive ====== */
+  @media (max-width: 640px) {
+    body { padding: 10px; }
+    header h1 { font-size: 21px; }
+    .card { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full { grid-column: 1; }
+    .tabs { gap: 2px; padding: 3px; }
+    .tab-btn { padding: 8px 12px; font-size: 13px; }
+    .scanner-wrapper { max-width: 100%; }
+    .modal { padding: 20px; }
+    .btn-group .btn { flex: 1; justify-content: center; }
+    .view-header { padding: 24px 16px 20px; }
+    .view-body { padding: 16px; }
+    .view-header h2 { font-size: 19px; }
+  }
+
+  .mt-2 { margin-top: 8px; }
+  .mt-4 { margin-top: 16px; }
+  .text-center { text-align: center; }
+  .flex { display: flex; }
+  .flex-center { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .gap-2 { gap: 8px; }
+  .w-full { width: 100%; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 扫码展示页 (只显示产品卡片) ==================== -->
+<div class="container">
+  <div class="view-page" id="view-page">
+    <div style="text-align:center;padding:20px 0;">
+      <span style="font-size:20px;font-weight:700;color:var(--gray-800);">📦 产品信息</span>
+    </div>
+    <div class="view-product-card" id="view-product-card">
+      <div class="view-header">
+        <div class="icon-badge">📦</div>
+        <h2 id="view-prod-name">产品名称</h2>
+        <span class="sku-tag" id="view-prod-sku">SKU</span>
+      </div>
+      <div class="view-body" id="view-body-fields">
+        <!-- 动态生成 -->
+      </div>
+      <div class="view-footer">
+        <div class="timestamp" id="view-timestamp"></div>
+        <button class="go-tool-btn" onclick="showTool()">🔧 前往管理工具</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 管理工具 ==================== -->
+<div id="tool-container">
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <h1>📦 产品信息二维码 <span>v2.0</span></h1>
+    <p>生成二维码 · 扫码即看 · 任何人可用微信/支付宝扫码查看</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="generate">📝 生成二维码</button>
+    <button class="tab-btn" data-tab="scan">📷 扫码识物</button>
+    <button class="tab-btn" data-tab="library">📋 产品库</button>
+  </div>
+
+  <!-- ====== Tab 1: 生成二维码 ====== -->
+  <div class="panel active" id="panel-generate">
+    <div class="card">
+      <div class="card-title">🆕 产品信息</div>
+
+      <!-- 编码模式切换 -->
+      <div class="mode-switch">
+        <button class="mode-btn active" data-mode="data" onclick="switchMode('data')">
+          📄 标准模式
+        </button>
+        <button class="mode-btn" data-mode="share" onclick="switchMode('share')">
+          🌐 分享模式
+        </button>
+      </div>
+      <div class="mode-hint" id="mode-hint-data">
+        ✅ 二维码编码原始产品数据，<strong>仅限本工具扫码</strong>解析。
+      </div>
+      <div class="mode-hint share" id="mode-hint-share" style="display:none;">
+        🌐 二维码编码网页链接，<strong>任何人用微信/支付宝/手机相机扫码</strong>即可看到产品信息卡片。
+      </div>
+
+      <!-- 分享模式：需要设置公开地址 -->
+      <div id="share-url-setting" style="display:none;" class="mt-2">
+        <div class="form-group">
+          <label>本工具的公开访问地址 <span class="req">*</span></label>
+          <input type="url" id="share-base-url" placeholder="例：https://你的用户名.github.io/product-qr-tool.html" value="" />
+          <div style="font-size:12px;color:var(--gray-400);margin-top:4px;">
+            💡 你需要先把本 HTML 文件部署到网上（见下方指引），再把完整地址填到这里
+          </div>
+        </div>
+        <!-- 部署指引 -->
+        <div class="guide-box" id="deploy-guide">
+          <h4>🚀 部署到互联网（选一种方式）</h4>
+          <div class="step" data-num="1">
+            <strong>方式一：GitHub Pages（推荐）</strong><br/>
+            把本文件上传到 GitHub 仓库，开启 Pages，获得 <code>https://用户名.github.io/仓库名/product-qr-tool.html</code>
+          </div>
+          <div class="step" data-num="2" style="margin-top:8px;">
+            <strong>方式二：内网服务器</strong><br/>
+            把本文件放到内网 Web 服务器上，用内网地址访问（如 <code>http://192.168.x.x/product-qr-tool.html</code>），公司内部扫码可用
+          </div>
+          <div class="step" data-num="3" style="margin-top:8px;">
+            <strong>方式三：临时 HTTP 服务</strong><br/>
+            在文件所在目录执行 <code>python -m http.server 8080</code>，然后用内网 IP 访问
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid mt-4">
+        <div class="form-group">
+          <label>产品名称 <span class="req">*</span></label>
+          <input type="text" id="prod-name" placeholder="例：无线蓝牙耳机" />
+        </div>
+        <div class="form-group">
+          <label>产品编号 / SKU</label>
+          <input type="text" id="prod-sku" placeholder="例：BT-2024-001" />
+        </div>
+        <div class="form-group">
+          <label>分类</label>
+          <select id="prod-category">
+            <option value="">选择分类</option>
+            <option>电子产品</option>
+            <option>办公用品</option>
+            <option>家居日用品</option>
+            <option>食品饮料</option>
+            <option>服装鞋帽</option>
+            <option>仪器设备</option>
+            <option>IT 资产</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>价格 (元)</label>
+          <input type="number" id="prod-price" placeholder="0.00" step="0.01" min="0" />
+        </div>
+        <div class="form-group full">
+          <label>描述 / 规格</label>
+          <textarea id="prod-desc" placeholder="产品描述、规格参数、功能特点等"></textarea>
+        </div>
+        <div class="form-group">
+          <label>供应商 / 品牌</label>
+          <input type="text" id="prod-brand" placeholder="例：华为" />
+        </div>
+        <div class="form-group">
+          <label>库存数量</label>
+          <input type="number" id="prod-stock" placeholder="0" min="0" />
+        </div>
+        <div class="form-group full">
+          <label>备注</label>
+          <input type="text" id="prod-remark" placeholder="其他需要记录的附加信息" />
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-lg" onclick="generateQR()">🎯 生成二维码</button>
+        <button class="btn btn-outline" onclick="clearForm()">清空表单</button>
+      </div>
+    </div>
+
+    <!-- QR Code Result -->
+    <div class="card" id="qr-result-card" style="display:none;">
+      <div class="card-title">✅ 生成的二维码</div>
+      <div class="qr-result">
+        <div id="qrcode"></div>
+        <div class="qr-actions">
+          <button class="btn btn-success btn-sm" onclick="downloadQR()">⬇️ 下载 PNG</button>
+          <button class="btn btn-primary btn-sm" onclick="copyQRData()">📋 复制数据</button>
+          <button class="btn btn-outline btn-sm" onclick="saveToLibrary()">💾 存入产品库</button>
+          <button class="btn btn-outline btn-sm" onclick="printQR()">🖨️ 打印</button>
+          <button class="btn btn-info btn-sm" id="btn-test-view" onclick="testViewPage()" style="background:var(--warning);color:#fff;">👁️ 预览展示页</button>
+        </div>
+        <div class="qr-data-preview" id="qr-data-preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Tab 2: 扫码识物 ====== -->
+  <div class="panel" id="panel-scan">
+    <div class="card">
+      <div class="card-title">📷 扫描二维码</div>
+      <p style="font-size:14px;color:var(--gray-500);margin-bottom:14px;">
+        将二维码对准摄像头，系统自动识别并展示产品信息。
+      </p>
+      <div class="scanner-wrapper" id="scanner-wrapper">
+        <video id="scanner-video" autoplay playsinline muted></video>
+        <div class="scanner-overlay">
+          <div class="scan-frame"></div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+      <div class="scanner-status" id="scanner-status">
+        <span>📷 等待开启摄像头...</span>
+      </div>
+      <div class="btn-group" style="justify-content:center;">
+        <button class="btn btn-primary" id="scan-start-btn" onclick="startScanner()">▶️ 开启扫码</button>
+        <button class="btn btn-danger" id="scan-stop-btn" onclick="stopScanner()" disabled>⏹ 停止扫码</button>
+      </div>
+
+      <!-- Scan Result -->
+      <div class="scanner-result-card" id="scan-result-card">
+        <div class="label">📦 识别到产品</div>
+        <div class="value" id="scan-result-name">-</div>
+        <div id="scan-result-detail" style="font-size:13px;margin-top:6px;opacity:.9;"></div>
+        <div class="actions">
+          <button class="btn" onclick="viewScannedDetail()">查看详情</button>
+          <button class="btn" onclick="saveScannedToLibrary()">存入产品库</button>
+          <button class="btn" onclick="dismissScanResult()">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual Input -->
+    <div class="card">
+      <div class="card-title">⌨️ 手动输入</div>
+      <p style="font-size:14px;color:var(--gray-500);margin-bottom:10px;">
+        粘贴二维码扫描得到的文本数据，或上传二维码图片识别。
+      </p>
+      <textarea id="manual-qr-input" placeholder='粘贴 JSON 数据或网页链接，例如：{"name":"蓝牙耳机",...} 或 https://...' rows="4" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;font-family:monospace;resize:vertical;"></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" onclick="decodeManualInput()">🔍 解析数据</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('upload-qr-file').click()">🖼️ 上传图片识别</button>
+        <input type="file" id="upload-qr-file" accept="image/*" style="display:none" onchange="decodeImageFile(event)" />
+      </div>
+      <div id="manual-decode-result" style="margin-top:12px;display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ====== Tab 3: 产品库 ====== -->
+  <div class="panel" id="panel-library">
+    <div class="card">
+      <div class="card-title">
+        📋 产品库
+        <span class="badge" id="library-count">0 个产品</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" onclick="exportLibrary()">📤 导出 JSON</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('import-library-file').click()">📥 导入 JSON</button>
+        <input type="file" id="import-library-file" accept=".json" style="display:none" onchange="importLibrary(event)" />
+        <button class="btn btn-danger btn-sm" onclick="clearLibrary()">🗑️ 清空产品库</button>
+      </div>
+      <div class="table-wrap mt-4">
+        <table>
+          <thead>
+            <tr>
+              <th>产品名称</th>
+              <th>编号</th>
+              <th>分类</th>
+              <th>价格</th>
+              <th style="width:150px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="library-tbody">
+          </tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="library-empty">
+        <div class="icon">📭</div>
+        <p>产品库为空，生成二维码后可存入产品库</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ====== Modal ====== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>📦 产品详情</h2>
+    <div class="product-detail-grid" id="modal-content"></div>
+    <div class="btn-group" style="margin-top:18px;">
+      <button class="btn btn-primary btn-sm" onclick="generateFromDetail()">🔄 据此生成二维码</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Toast ====== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================================================
+//  State
+// ========================================================================
+let qrCodeInstance = null;
+let currentQRData = null;        // raw JSON or URL
+let currentQRMode = 'data';     // 'data' | 'share'
+let currentProductObject = null; // the product data object for last generated QR
+let currentScannedData = null;
+let scannerStream = null;
+let scanLoopRunning = false;
+let library = [];
+
+// ========================================================================
+//  Init — 判断是「展示页」还是「工具页」
+// ========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // 检查 URL hash 中有没有 product 数据
+  const hash = decodeURIComponent(window.location.hash.slice(1));
+  if (hash.startsWith('product=')) {
+    try {
+      const b64 = hash.slice(8);
+      const json = atob(b64);
+      const data = JSON.parse(json);
+      showViewPage(data);
+      return;
+    } catch (e) {
+      console.warn('Hash product parse failed', e);
+    }
+  }
+  // 正常加载工具
+  loadLibrary();
+  initTabs();
+  document.getElementById('tool-container').style.display = 'block';
+});
+
+// ========================================================================
+//  产品展示页（别人扫码看到的样子）
+// ========================================================================
+function showViewPage(data) {
+  document.getElementById('tool-container').style.display = 'none';
+  document.getElementById('view-page').classList.add('show');
+
+  // 填充数据
+  document.getElementById('view-prod-name').textContent = data.name || '未命名产品';
+  document.getElementById('view-prod-sku').textContent = data.sku ? '编号: ' + data.sku : '';
+
+  const body = document.getElementById('view-body-fields');
+  body.innerHTML = '';
+
+  const fields = [
+    { label: '分类', key: 'category' },
+    { label: '品牌', key: 'brand' },
+    { label: '价格', key: 'price', cls: 'price', fmt: v => v ? '¥' + Number(v).toFixed(2) : '' },
+    { label: '库存', key: 'stock', fmt: v => v !== undefined && v !== '' ? v + ' 件' : '' },
+    { label: '产品描述', key: 'description', cls: 'desc' },
+    { label: '备注', key: 'remark', cls: 'desc' },
+  ];
+
+  let hasAny = false;
+  fields.forEach(f => {
+    let val = data[f.key];
+    if (val === undefined || val === null || val === '') return;
+    if (f.fmt) val = f.fmt(val);
+    if (!val) return;
+    hasAny = true;
+    body.innerHTML += `<div class="view-field">
+      <span class="label">${f.label}</span>
+      <span class="value ${f.cls || ''}">${escapeHtml(String(val))}</span>
+    </div>`;
+  });
+
+  if (!hasAny) {
+    body.innerHTML = '<div class="view-field"><span class="label" style="color:var(--gray-400);text-align:center;width:100%;">暂无详细信息</span></div>';
+  }
+
+  // 时间
+  if (data._ts) {
+    const d = new Date(data._ts);
+    document.getElementById('view-timestamp').textContent = '更新时间: ' + d.toLocaleString('zh-CN');
+  } else {
+    document.getElementById('view-timestamp').textContent = '';
+  }
+}
+
+// 从展示页回到工具
+function showTool() {
+  document.getElementById('view-page').classList.remove('show');
+  document.getElementById('tool-container').style.display = 'block';
+  window.location.hash = '';
+}
+
+// ========================================================================
+//  Tabs
+// ========================================================================
+function initTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'library') renderLibrary();
+    });
+  });
+}
+
+// ========================================================================
+//  Mode Switch
+// ========================================================================
+function switchMode(mode) {
+  currentQRMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
+  document.getElementById('mode-hint-data').style.display = mode === 'data' ? 'block' : 'none';
+  document.getElementById('mode-hint-share').style.display = mode === 'share' ? 'block' : 'none';
+  document.getElementById('share-url-setting').style.display = mode === 'share' ? 'block' : 'none';
+}
+
+// ========================================================================
+//  QR Code Generation
+// ========================================================================
+function collectProductData() {
+  const data = {};
+  const name = document.getElementById('prod-name').value.trim();
+  if (!name) { toast('请输入产品名称', 'error'); return null; }
+  data.name = name;
+  data.sku = document.getElementById('prod-sku').value.trim();
+  data.category = document.getElementById('prod-category').value;
+  const price = document.getElementById('prod-price').value;
+  data.price = price ? parseFloat(price) : 0;
+  data.description = document.getElementById('prod-desc').value.trim();
+  data.brand = document.getElementById('prod-brand').value.trim();
+  const stock = document.getElementById('prod-stock').value;
+  data.stock = stock ? parseInt(stock) : 0;
+  data.remark = document.getElementById('prod-remark').value.trim();
+  data._type = 'product-info';
+  data._ver = '2.0';
+  data._ts = new Date().toISOString();
+  return data;
+}
+
+function generateQR() {
+  const data = collectProductData();
+  if (!data) return;
+  currentProductObject = data;
+
+  let qrText;
+  let previewText;
+
+  if (currentQRMode === 'share') {
+    // 分享模式：编码为 URL 链接
+    const baseUrl = document.getElementById('share-base-url').value.trim();
+    if (!baseUrl) {
+      toast('请填写工具的公开访问地址', 'error');
+      document.getElementById('share-base-url').focus();
+      return;
+    }
+    try { new URL(baseUrl); } catch (e) {
+      toast('访问地址格式不正确，请填写完整的 URL', 'error');
+      return;
+    }
+    // 把产品数据 base64 编码后作为 hash
+    const json = JSON.stringify(data);
+    const b64 = btoa(json);
+    // 确保 URL 末尾无多余 #，直接拼接
+    const cleanUrl = baseUrl.replace(/#.*$/, '');
+    qrText = cleanUrl + '#product=' + b64;
+    previewText = '🌐 ' + qrText;
+  } else {
+    // 标准模式：编码原始 JSON
+    qrText = JSON.stringify(data, null, 2);
+    previewText = qrText;
+  }
+
+  currentQRData = qrText;
+
+  // Clear previous QR
+  const container = document.getElementById('qrcode');
+  container.innerHTML = '';
+
+  // Generate
+  qrCodeInstance = new QRCode(container, {
+    text: qrText,
+    width: 220,
+    height: 220,
+    colorDark: '#1f2937',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  document.getElementById('qr-data-preview').textContent = previewText;
+  document.getElementById('qr-result-card').style.display = 'block';
+  document.getElementById('qr-result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  if (currentQRMode === 'share') {
+    toast('分享二维码生成成功！任何人扫码即可查看 ✅', 'success');
+  } else {
+    toast('二维码生成成功 ✅', 'success');
+  }
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qrcode canvas') || document.querySelector('#qrcode img');
+  if (!canvas) { toast('请先生成二维码', 'error'); return; }
+  let imgSrc;
+  if (canvas.tagName === 'CANVAS') {
+    imgSrc = canvas.toDataURL('image/png');
+  } else {
+    imgSrc = canvas.src;
+  }
+  const name = document.getElementById('prod-name').value.trim() || 'product';
+  const suffix = currentQRMode === 'share' ? '-扫码查看' : '-二维码';
+  const link = document.createElement('a');
+  link.download = `${name}${suffix}.png`;
+  link.href = imgSrc;
+  link.click();
+  toast('已下载二维码图片 ⬇️', 'success');
+}
+
+function copyQRData() {
+  if (!currentQRData) { toast('请先生成二维码', 'error'); return; }
+  navigator.clipboard.writeText(currentQRData).then(() => {
+    toast('数据已复制到剪贴板 📋', 'success');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = currentQRData;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('数据已复制到剪贴板 📋', 'success');
+  });
+}
+
+function printQR() {
+  const dataPreview = document.getElementById('qr-data-preview').textContent;
+  const canvas = document.querySelector('#qrcode canvas');
+  let imgSrc = '';
+  if (canvas) {
+    imgSrc = canvas.toDataURL('image/png');
+  } else {
+    const img = document.querySelector('#qrcode img');
+    if (img) imgSrc = img.src;
+  }
+  if (!imgSrc) { toast('请先生成二维码', 'error'); return; }
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><title>打印产品二维码</title>
+    <style>
+      body { font-family: sans-serif; text-align: center; padding: 40px; }
+      img { width: 300px; height: 300px; }
+      .info { margin-top: 20px; font-size: 14px; color: #555; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; white-space: pre-wrap; word-break: break-all; }
+      @media print { body { padding: 20px; } }
+    </style></head>
+    <body>
+      <img src="${imgSrc}" />
+      <div class="info">${escapeHtml(dataPreview)}</div>
+      <script>
+        window.onload = function() { window.print(); window.close(); }
+      <\\/script>
+    </body></html>
+  `);
+  win.document.close();
+}
+
+function clearForm() {
+  document.querySelectorAll('#panel-generate input, #panel-generate textarea, #panel-generate select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  toast('表单已清空', 'info');
+}
+
+// 预览展示页效果
+function testViewPage() {
+  if (!currentProductObject) { toast('请先生成二维码', 'error'); return; }
+  showViewPage(currentProductObject);
+}
+
+// ========================================================================
+//  Scanner
+// ========================================================================
+async function startScanner() {
+  const video = document.getElementById('scanner-video');
+  const status = document.getElementById('scanner-status');
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    if (cams.length === 0) {
+      status.innerHTML = '❌ 未检测到摄像头';
+      toast('未检测到摄像头设备', 'error');
+      return;
+    }
+    const constraints = {
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+    };
+    scannerStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = scannerStream;
+    await video.play();
+    status.innerHTML = '📷 正在扫描... 请将二维码对准框内';
+    document.getElementById('scan-start-btn').disabled = true;
+    document.getElementById('scan-stop-btn').disabled = false;
+    scanLoopRunning = true;
+    scanLoop();
+  } catch (err) {
+    console.error(err);
+    status.innerHTML = '❌ 无法开启摄像头: ' + (err.message || '未知错误');
+    toast('无法开启摄像头，请检查权限设置', 'error');
+  }
+}
+
+function stopScanner() {
+  scanLoopRunning = false;
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  const video = document.getElementById('scanner-video');
+  video.srcObject = null;
+  document.getElementById('scanner-status').innerHTML = '📷 摄像头已关闭';
+  document.getElementById('scan-start-btn').disabled = false;
+  document.getElementById('scan-stop-btn').disabled = true;
+  dismissScanResult();
+}
+
+function scanLoop() {
+  if (!scanLoopRunning) return;
+  const video = document.getElementById('scanner-video');
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    requestAnimationFrame(scanLoop);
+    return;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, canvas.width, canvas.height, {
+    inversionAttempts: 'dontInvert'
+  });
+  if (code) {
+    handleScanResult(code.data);
+    return;
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+function handleScanResult(data) {
+  stopScanner();
+  // 尝试解析：可能是 JSON，也可能是 URL（分享模式）
+  let parsed = null;
+
+  // 先尝试作为 JSON 解析
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    // 不是 JSON，可能是 URL，尝试从 hash 提取 product 数据
+    const hashMatch = data.match(/#product=([^#]+)$/);
+    if (hashMatch) {
+      try {
+        const json = atob(hashMatch[1]);
+        parsed = JSON.parse(json);
+      } catch (e2) { /* not valid */ }
+    }
+  }
+
+  if (parsed && (parsed._type === 'product-info' || parsed.name)) {
+    currentScannedData = parsed;
+    const card = document.getElementById('scan-result-card');
+    card.classList.add('show');
+    document.getElementById('scan-result-name').textContent = parsed.name || '未知产品';
+    let detail = '';
+    if (parsed.sku) detail += '编号: ' + parsed.sku + '  ';
+    if (parsed.category) detail += '分类: ' + parsed.category + '  ';
+    if (parsed.price) detail += '价格: ¥' + parsed.price;
+    document.getElementById('scan-result-detail').textContent = detail || '已识别到产品数据';
+    toast('✅ 扫码成功！', 'success');
+  } else {
+    toast('⚠️ 未识别到产品信息数据', 'warning');
+    document.getElementById('scanner-status').innerHTML = '⚠️ 无效数据，继续扫码...';
+    setTimeout(() => startScanner(), 500);
+  }
+}
+
+function viewScannedDetail() {
+  if (!currentScannedData) return;
+  showProductDetail(currentScannedData);
+}
+
+function saveScannedToLibrary() {
+  if (!currentScannedData) return;
+  saveToLibraryWithData(currentScannedData);
+  toast('已存入产品库 💾', 'success');
+  dismissScanResult();
+}
+
+function dismissScanResult() {
+  document.getElementById('scan-result-card').classList.remove('show');
+  currentScannedData = null;
+}
+
+// ========================================================================
+//  Manual Input & Image Upload
+// ========================================================================
+function decodeManualInput() {
+  const val = document.getElementById('manual-qr-input').value.trim();
+  if (!val) { toast('请输入内容', 'error'); return; }
+
+  let parsed = null;
+  // JSON
+  try { parsed = JSON.parse(val); } catch (e) { /* try URL */ }
+
+  // URL with hash
+  if (!parsed) {
+    const hashMatch = val.match(/#product=([^#]+)$/);
+    if (hashMatch) {
+      try { parsed = JSON.parse(atob(hashMatch[1])); } catch (e2) {}
+    }
+  }
+
+  if (parsed && parsed.name) {
+    showDecodeResult(parsed);
+  } else if (parsed) {
+    toast('数据格式不是产品信息', 'error');
+  } else {
+    toast('无法解析输入内容，请粘贴 JSON 或二维码链接', 'error');
+  }
+}
+
+function decodeImageFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+      if (code) {
+        document.getElementById('manual-qr-input').value = code.data;
+        decodeManualInput();
+      } else {
+        toast('未识别到二维码，请尝试更清晰的图片', 'error');
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function showDecodeResult(data) {
+  const el = document.getElementById('manual-decode-result');
+  if (!data.name) {
+    el.innerHTML = `<div style="padding:12px;background:#fef2f2;border-radius:8px;color:var(--danger);font-size:14px;">
+      ⚠️ 数据中缺少产品名称字段
+    </div>`;
+  } else {
+    el.innerHTML = `<div style="padding:16px;background:var(--gray-50);border-radius:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${Object.entries(data).filter(([k]) => !k.startsWith('_')).map(([k, v]) =>
+          `<div><span style="color:var(--gray-400);font-size:12px;">${k}:</span> <span style="font-weight:500;font-size:14px;">${v}</span></div>`
+        ).join('')}
+      </div>
+      <div class="btn-group" style="margin-top:12px;">
+        <button class="btn btn-primary btn-sm" onclick="saveToLibraryWithData(${JSON.stringify(data).replace(/"/g, '&quot;')})">💾 存入产品库</button>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('manual-decode-result').style.display='none'">关闭</button>
+      </div>
+    </div>`;
+  }
+  el.style.display = 'block';
+}
+
+// ========================================================================
+//  Product Library
+// ========================================================================
+function loadLibrary() {
+  try {
+    const saved = localStorage.getItem('product_qr_library');
+    if (saved) library = JSON.parse(saved);
+  } catch (e) { library = []; }
+}
+
+function saveLibrary() {
+  localStorage.setItem('product_qr_library', JSON.stringify(library));
+  updateLibraryCount();
+}
+
+function updateLibraryCount() {
+  document.getElementById('library-count').textContent = library.length + ' 个产品';
+}
+
+function saveToLibrary() {
+  const data = collectProductData();
+  if (!data) return;
+  saveToLibraryWithData(data);
+}
+
+function saveToLibraryWithData(data) {
+  const exists = library.findIndex(p => p.sku && p.sku === data.sku);
+  if (exists >= 0) {
+    if (!confirm(`产品编号 "${data.sku}" 已存在，是否覆盖？`)) return;
+    library[exists] = { ...library[exists], ...data, _ts: new Date().toISOString() };
+  } else {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    library.unshift({ id, ...data });
+  }
+  saveLibrary();
+  toast('已存入产品库 💾', 'success');
+}
+
+function renderLibrary() {
+  const tbody = document.getElementById('library-tbody');
+  const empty = document.getElementById('library-empty');
+  tbody.innerHTML = '';
+  if (library.length === 0) {
+    empty.style.display = 'block';
+    tbody.style.display = 'none';
+    updateLibraryCount();
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.style.display = '';
+  library.forEach((product, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="product-name">${escapeHtml(product.name || '未命名')}</div>
+        ${product.brand ? `<span style="font-size:12px;color:var(--gray-400);">${escapeHtml(product.brand)}</span>` : ''}
+      </td>
+      <td><span class="product-sku">${escapeHtml(product.sku || '-')}</span></td>
+      <td>${product.category ? `<span class="tag tag-blue">${escapeHtml(product.category)}</span>` : '-'}</td>
+      <td>${product.price ? '¥' + product.price : '-'}</td>
+      <td class="row-actions">
+        <button class="btn btn-primary btn-sm" onclick="generateFromProduct(${idx})">生成二维码</button>
+        <button class="btn btn-outline btn-sm" onclick="showProductDetail(library[${idx}])">详情</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${idx})">删除</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateLibraryCount();
+}
+
+function showProductDetail(product) {
+  const modal = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+  const fields = [
+    { label: '产品名称', key: 'name', full: true },
+    { label: '编号 / SKU', key: 'sku' },
+    { label: '分类', key: 'category' },
+    { label: '价格', key: 'price', fmt: v => v ? '¥' + v : '-' },
+    { label: '品牌 / 供应商', key: 'brand' },
+    { label: '库存', key: 'stock', fmt: v => v !== undefined && v !== '' ? v + ' 件' : '-' },
+    { label: '描述 / 规格', key: 'description', full: true },
+    { label: '备注', key: 'remark', full: true },
+  ];
+  let html = '';
+  fields.forEach(f => {
+    let val = product[f.key];
+    if (val === undefined || val === null || val === '') val = '-';
+    else if (f.fmt) val = f.fmt(val);
+    html += `<div class="detail-item ${f.full ? 'full' : ''}">
+      <div class="label">${f.label}</div>
+      <div class="value">${escapeHtml(String(val))}</div>
+    </div>`;
+  });
+  content.innerHTML = html;
+  content.dataset.productIndex = library.indexOf(product);
+  modal.classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function generateFromDetail() {
+  const idx = parseInt(document.getElementById('modal-content').dataset.productIndex);
+  if (idx >= 0 && library[idx]) {
+    generateFromProduct(idx);
+    closeModal();
+  }
+}
+
+function generateFromProduct(idx) {
+  const prod = library[idx];
+  if (!prod) return;
+  document.getElementById('prod-name').value = prod.name || '';
+  document.getElementById('prod-sku').value = prod.sku || '';
+  document.getElementById('prod-category').value = prod.category || '';
+  document.getElementById('prod-price').value = prod.price || '';
+  document.getElementById('prod-desc').value = prod.description || '';
+  document.getElementById('prod-brand').value = prod.brand || '';
+  document.getElementById('prod-stock').value = prod.stock || '';
+  document.getElementById('prod-remark').value = prod.remark || '';
+  document.querySelector('[data-tab="generate"]').click();
+  toast('已加载产品信息到表单 📝', 'info');
+}
+
+function deleteProduct(idx) {
+  if (!confirm(`确定删除 "${library[idx]?.name || '此产品'}"？`)) return;
+  library.splice(idx, 1);
+  saveLibrary();
+  renderLibrary();
+  toast('已删除', 'info');
+}
+
+function clearLibrary() {
+  if (library.length === 0) return;
+  if (!confirm('确定清空所有产品？此操作不可撤销！')) return;
+  library = [];
+  saveLibrary();
+  renderLibrary();
+  toast('产品库已清空 🗑️', 'info');
+}
+
+function exportLibrary() {
+  if (library.length === 0) { toast('产品库为空', 'error'); return; }
+  const json = JSON.stringify(library, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = `产品库_${new Date().toISOString().slice(0,10)}.json`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+  toast('产品库导出成功 📤', 'success');
+}
+
+function importLibrary(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('格式错误');
+      if (data.length === 0) { toast('文件为空', 'error'); return; }
+      const count = data.length;
+      library = [...data, ...library];
+      saveLibrary();
+      renderLibrary();
+      toast(`成功导入 ${count} 个产品 📥`, 'success');
+    } catch (err) {
+      toast('导入失败：文件格式不正确', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ========================================================================
+//  Utility
+// ========================================================================
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+let toastTimer = null;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast toast-' + type + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2500);
+}
+
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+document.querySelectorAll('#panel-generate input, #panel-generate textarea').forEach(el => {
+  el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') generateQR();
+  });
+});
+</script>
+</body>
+</html>
